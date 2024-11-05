@@ -1,0 +1,15 @@
+#!/bin/bash
+check=1
+while true; do
+  output=$(ps -Ao comm,pcpu | grep $1)
+  if [ ! -z "$output" ]; then
+    printf "\033[2;3;6;35m(check: $check)\033[m\n"
+    printf "\t\033[1;36mPROGRAM\033[m  |  \033[1;33mCPU usage\033[m\n"
+    printf "\t\033[3;6;34m"
+    echo "$output%"
+    printf "\033[m"
+    ((++check))
+  fi  
+  sleep 1.87
+done
+
