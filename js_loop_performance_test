@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 
-// Testing loop performance for most used iterable array method in JavaScript
+// Testing loop performance for the most used array methods in JavaScript
 console.time('Test Execution Duration');
 
 
 const arraySize = parseInt(1e5); // 100000
 const testArray = Array(arraySize);
 
-// Pre-allocating memory for the mapp function returned array to avoid memory realloacation per
+// Pre-allocating memory for the map function returned array to avoid memory realloacation per
 // iteration (as repeated `arrayMapCopy.push(el)` calls would do). We are declaring it as a global
 // variable in order to not impact the perfomance measure of the loopMap function (line 196).
 let arrayMapCopy = Array(arraySize);
@@ -15,7 +15,7 @@ let arrayMapCopy = Array(arraySize);
 const testResultsArray = [];
 const iterations = 1500;
 for (let i = 0; i < iterations; i++)
-  // we can use push here, once we are just agreggating results for 
+  // we can use push here, once we are just aggregating results for 
   // tests that were already executed in their isolated scopes
   testResultsArray.push(generateTestResults(testArray));
 
