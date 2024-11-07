@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env deno
 
 // Testing loop performance for most used iterable array method in JavaScript
 console.time('Test Execution Duration');
