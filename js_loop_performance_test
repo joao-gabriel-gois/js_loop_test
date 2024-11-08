@@ -3,107 +3,74 @@
 // Testing loop performance for the most used array methods in JavaScript
 console.time('Test Execution Duration');
 
-
 const arraySize = parseInt(1e5); // 100000
 const testArray = Array(arraySize);
-
 // Pre-allocating memory for the map function returned array to avoid memory realloacation per
-// iteration (as repeated `arrayMapCopy.push(el)` calls would do). We are declaring it as a global
-// variable in order to not impact the perfomance measure of the loopMap function (line 196).
-let arrayMapCopy = Array(arraySize);
+// iteration (as repeated `mapArray.push(el)` calls would eventually do). We are declaring it as a
+// global variable in order to not impact the perfomance measure of the loopMap function (line 164).
+const mapArray = Array(arraySize);
 
 const testResultsArray = [];
 const iterations = 1500;
-for (let i = 0; i < iterations; i++)
-  // we can use push here, once we are just aggregating results for 
+// Generating 1500 (iterations) test results
+for (let i = 0; i < iterations; i++) {
+  // using push here, once we're just aggregating results for 
   // tests that were already executed in their isolated scopes
   testResultsArray.push(generateTestResults(testArray));
+}
 
-// Average result of each operation after 1500 different tests (sorry, DRY)
-const forEachResult = Number(( // .forEach
-  testResultsArray.reduce(
-    (acc, result) => acc + result.forEach, 0) / testResultsArray.length
-).toFixed(5));
-const forLoopResult = Number(( // For Loop
-  testResultsArray.reduce(
-    (acc, result) => acc + result.forLoop, 0)/ testResultsArray.length
-).toFixed(5));
-const mapMethodResult = Number(( // .map
-  testResultsArray.reduce(
-    (acc, result) => acc + result.mapMethod, 0) / testResultsArray.length
-).toFixed(5));
-const mapLoopResult = Number(( // Map Loop
-  testResultsArray.reduce(
-    (acc, result) => acc + result.mapLoop, 0) / testResultsArray.length
-).toFixed(5));
-const findMethodResult = Number(( // .find
-  testResultsArray.reduce(
-    (acc, result) => acc + result.findMethod, 0) / testResultsArray.length
-).toFixed(5));
-const findLoopResult = Number(( // Find Loop
-  testResultsArray.reduce(
-    (acc, result) => acc + result.findLoop, 0) / testResultsArray.length
-).toFixed(5));
-const findIndexMethodResult = Number(( // .findIndex
-  testResultsArray.reduce(
-    (acc, result) => acc + result.findIndexMethod, 0) / testResultsArray.length
-).toFixed(5));
-const findIndexLoopResult = Number(( // FindIndex Loop
-  testResultsArray.reduce(
-    (acc, result) => acc + result.findIndexLoop, 0) / testResultsArray.length
-).toFixed(5));
-const filterMethodResult = Number(( // .filter
-  testResultsArray.reduce(
-    (acc, result) => acc + result.filterMethod, 0) / testResultsArray.length
-).toFixed(5));
-const filterLoopResult = Number(( // Filter Loop
-  testResultsArray.reduce(
-    (acc, result) => acc + result.filterLoop, 0) / testResultsArray.length
-).toFixed(5));
-const reduceMethodResult = Number(( // .reduce
-  testResultsArray.reduce(
-    (acc, result) => acc + result.reduceMethod, 0) / testResultsArray.length
-).toFixed(5));
-const reduceLoopResult = Number(( // Reduce Loop
-  testResultsArray.reduce(
-    (acc, result) => acc + result.reduceLoop, 0) / testResultsArray.length
-).toFixed(5));
+// Calculating average test result for each operation after 1500 different tests
+const resultProps = [
+  'forEach','forLoop',
+  'mapMethod','mapLoop',
+  'findMethod', 'findLoop',
+  'findIndexMethod','findIndexLoop',
+  'filterMethod','filterLoop',
+  'reduceMethod','reduceLoop'
+];
+const results = {};
+for (const prop of resultProps) {
+  const currentPropResultSum = testResultsArray
+    .reduce((acc, result) => acc + result[prop], 0);
+  results[prop] = Number((currentPropResultSum / testResultsArray.length).toFixed(5));
+}
 
 console.log(`Average Results for ${iterations} test samples from arrays with ${arraySize} random numbers from 1 to 10000.`);
 console.table([
   { 
-    Operation: 'For', 'Method (ms)': forEachResult,
-    'Loop (ms)': forLoopResult,
-    'Difference (loop - method)': Number((forLoopResult - forEachResult).toFixed(5))
+    Operation: 'For', 'Method (ms)': results.forEach,
+    'Loop (ms)': results.forLoop,
+    'Difference (loop - method)': Number((results.forLoop - results.forEach).toFixed(5))
   },
   { 
-    Operation: 'Map', 'Method (ms)': mapMethodResult,
-    'Loop (ms)': mapLoopResult,
-    'Difference (loop - method)': Number((mapLoopResult - mapMethodResult).toFixed(5))
+    Operation: 'Map', 'Method (ms)': results.mapMethod,
+    'Loop (ms)': results.mapLoop,
+    'Difference (loop - method)': Number((results.mapLoop - results.mapMethod).toFixed(5))
   },
   { 
-    Operation: 'Find', 'Method (ms)': findMethodResult,
-    'Loop (ms)': findLoopResult,
-    'Difference (loop - method)': Number((findLoopResult - findMethodResult).toFixed(5))
+    Operation: 'Find', 'Method (ms)': results.findMethod,
+    'Loop (ms)': results.findLoop,
+    'Difference (loop - method)': Number((results.findLoop - results.findMethod).toFixed(5))
   },
   { 
-    Operation: 'FindIndex', 'Method (ms)': findIndexMethodResult,
-    'Loop (ms)': findIndexLoopResult,
-    'Difference (loop - method)': Number((findIndexLoopResult - findIndexMethodResult).toFixed(5))
+    Operation: 'FindIndex', 'Method (ms)': results.findIndexMethod,
+    'Loop (ms)': results.findIndexLoop,
+    'Difference (loop - method)': Number((results.findIndexLoop - results.findIndexMethod).toFixed(5))
   },
   { 
-    Operation: 'Filter', 'Method (ms)': filterMethodResult,
-    'Loop (ms)': filterLoopResult,
-    'Difference (loop - method)': Number((filterLoopResult - filterMethodResult).toFixed(5))
+    Operation: 'Filter', 'Method (ms)': results.filterMethod,
+    'Loop (ms)': results.filterLoop,
+    'Difference (loop - method)': Number((results.filterLoop - results.filterMethod).toFixed(5))
   },
   { 
-    Operation: 'Reduce', 'Method (ms)': reduceMethodResult,
-    'Loop (ms)': reduceLoopResult,
-    'Difference (loop - method)': Number((reduceLoopResult - reduceMethodResult).toFixed(5))
+    Operation: 'Reduce', 'Method (ms)': results.reduceMethod,
+    'Loop (ms)': results.reduceLoop,
+    'Difference (loop - method)': Number((results.reduceLoop - results.reduceMethod).toFixed(5))
   }
 ]);
 
 console.timeEnd('Test Execution Duration');
+
 
 function generateTestResults(testArray) {
   // For x ForEach
@@ -192,13 +159,13 @@ function generateTestResults(testArray) {
   }
 }
 
+
 // Loop alternatives for comparison
 function loopMap(array, operation) {
   for (let [i, element] of array.entries()) {
-    arrayMapCopy[i] = eval(`${element} ${operation}`);
+    mapArray[i] = eval(`${element} ${operation}`);
   }
-
-  return arrayMapCopy;
+  return mapArray;
 }
 
 function loopFind(array, value) {
@@ -220,7 +187,7 @@ function loopFilter(array, condition) {
   for (let value of array) {
     // Only supports numbers, if you want to support also strings, you need something like the logic bellow
     // const condition = typeof value === 'string' ? `'${value}' ${condition}` : `${value} ${condition}`;
-    // anyways, is not a perfect filter for things such as objects, but for comparison, it works in this example.
+    // It's not a 100% filter counterpart and won't for objects (e.g). Tt's enough for this example, though.
     if (eval(`${value} ${condition}`)) {
       filteredArray.push(value);
     }
