@@ -21,12 +21,12 @@ for (let i = 0; i < iterations; i++) {
 
 // Calculating average test result for each operation after 1500 different tests
 const resultProps = [
-  'forEach','forLoop',
-  'mapMethod','mapLoop',
-  'findMethod', 'findLoop',
-  'findIndexMethod','findIndexLoop',
-  'filterMethod','filterLoop',
-  'reduceMethod','reduceLoop'
+  'forEach',         'forLoop',
+  'mapMethod',       'mapLoop',
+  'findMethod',      'findLoop',
+  'findIndexMethod', 'findIndexLoop',
+  'filterMethod',    'filterLoop',
+  'reduceMethod',    'reduceLoop',
 ];
 const results = {};
 for (const prop of resultProps) {
@@ -186,8 +186,8 @@ function loopFilter(array, condition) {
   const filteredArray = [];
   for (let value of array) {
     // Only supports numbers, if you want to support also strings, you need something like the logic bellow
-    // const condition = typeof value === 'string' ? `'${value}' ${condition}` : `${value} ${condition}`;
-    // It's not a 100% filter counterpart and won't for objects (e.g). Tt's enough for this example, though.
+      // const condition = typeof value === 'string' ? `'${value}' ${condition}` : `${value} ${condition}`;
+    // It's not a 100% filter counterpart and won't work for objects (e.g). It's enough for this example, though.
     if (eval(`${value} ${condition}`)) {
       filteredArray.push(value);
     }

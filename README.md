@@ -11,7 +11,7 @@
 
 The script was written in such a way it could run in any JS runtime. As it took some few minutes to be written, I think the test is worth it. The `loopMap` function uses a pre-allocated array declared as global variable to avoid as much as possible either _1) any impact on its implementation with the first memory allocation of a huge array length_ __or__ _2) any JS runtime reallocation when using `.push`_. The intention was to test the loop approach itself. I couldn't do the same for `loopFilter` because the returned array size is not predictable.
 
-The script basically aggregates lots of subsequent tests samples (1500 by default, be my guest to explode your CPU even more by changing the `iterations` value). So each method or loop performs 1500 tests with a long-sized array (100,000 by default - again, be my guest and change `arraySize` value). After processing, it shows a table with the results with the method, loop and the difference between them.
+The script basically aggregates lots of subsequent tests samples (1500 by default, be my guest to explode your CPU even more by changing the `iterations` value). So each method or loop performs 1500 tests with a long-sized array (100,000 by default - again, be my guest and change `arraySize` value). After processing, it shows a table with the average results (i.e, average execution time) for each method, loop implementation and the difference between them.
 
 You just need to clone this repo and run `./js_loop_perfomance_test` (default runtime is `node`, change / delete the shebang value in order to test with different runtimes).
 
