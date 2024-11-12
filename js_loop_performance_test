@@ -3,23 +3,23 @@
 // Testing loop performance for the most used array methods in JavaScript
 console.time('Test Execution Duration');
 
-const arraySize = parseInt(1e5); // 100000
-const testArray = Array(arraySize);
+const arraySize = parseInt(1.4 * 1e5); // 140000
+const samples = Array(arraySize);
 // Pre-allocating memory for the map function returned array to avoid memory realloacation per
 // iteration (as repeated `mapArray.push(el)` calls would eventually do). We are declaring it as a
 // global variable in order to not impact the perfomance measure of the loopMap function (line 164).
 const mapArray = Array(arraySize);
 
-const testResultsArray = [];
-const iterations = 1500;
-// Generating 1500 (iterations) test results
+const testResults = [];
+const iterations = 2000;
+// Generating 2000 (iterations) test results
 for (let i = 0; i < iterations; i++) {
   // using push here, once we're just aggregating results for 
   // tests that were already executed in their isolated scopes
-  testResultsArray.push(generateTestResults(testArray));
+  testResults.push(generateTestResults(samples));
 }
 
-// Calculating average test result for each operation after 1500 different tests
+// Calculating average test result for each operation after 2000 different samples
 const resultProps = [
   'forEach',         'forLoop',
   'mapMethod',       'mapLoop',
@@ -28,118 +28,124 @@ const resultProps = [
   'filterMethod',    'filterLoop',
   'reduceMethod',    'reduceLoop',
 ];
-const results = {};
+
+const avgResults = {};
 for (const prop of resultProps) {
-  const currentPropResultSum = testResultsArray
+  const currentPropResultSum = testResults
     .reduce((acc, result) => acc + result[prop], 0);
-  results[prop] = Number((currentPropResultSum / testResultsArray.length).toFixed(5));
+  avgResults[prop] = { mean: NaN }; // without that, bellow reassign will return an error ('trying to reach undefined.mean')
+  avgResults[prop].mean = currentPropResultSum / testResults.length;
 }
 
+// Adding standard deviation to results
+for (const prop of resultProps) {
+  const varianceTotalNumerator = testResults
+    .reduce((acc, result) => { 
+      return acc + ((result[prop] - avgResults[prop].mean) ** 2)
+    }, 0);
+
+  avgResults[prop].standardDeviation = Number(
+    (varianceTotalNumerator / testResults.length) ** 0.5
+  ); // sqrt of the variance
+}
+
+const avgResutlsFormattedTable = [];
+for (let i = 0; i < resultProps.length; i += 2) {
+  const method = resultProps[i]
+  const loop = resultProps[i + 1];
+  const methodCV = (avgResults[method].mean !== 0 ? (avgResults[method].standardDeviation / avgResults[method].mean * 100).toFixed(2) : 0) + '%';
+  const loopCV = (avgResults[loop].mean !== 0 ? (avgResults[loop].standardDeviation / avgResults[loop].mean * 100).toFixed(2) : 0) + '%';
+  const avgDiff = Number((avgResults[loop].mean - avgResults[method].mean).toFixed(5)) + '%';
+  const stdDevDiff = Number((avgResults[loop].standardDeviation - avgResults[method].standardDeviation).toFixed(5));
+  
+  avgResutlsFormattedTable.push({
+    Operation: `${capitalize(method.split('M')[0])} (ms)`, 
+    'Avg. Method': Number((avgResults[method].mean).toFixed(6)),
+    'Std. Dev. Method': Number((avgResults[method].standardDeviation).toFixed(6)),
+    'Coeff. of Variation (Method)': methodCV,
+    'Avg. Loop':  Number((avgResults[loop].mean).toFixed(6)),
+    'Std. Dev. Loop': Number((avgResults[loop].standardDeviation).toFixed(6)),
+    'Coeff. of Variation (Loop)': loopCV,
+    'Avg. Diff.(loop - method)': avgDiff,
+    'Std. Diff.(loop - method)': stdDevDiff
+  });
+};
+
 console.log(`Average Results for ${iterations} test samples from arrays with ${arraySize} random numbers from 1 to 10000.`);
-console.table([
-  { 
-    Operation: 'For', 'Method (ms)': results.forEach,
-    'Loop (ms)': results.forLoop,
-    'Difference (loop - method)': Number((results.forLoop - results.forEach).toFixed(5))
-  },
-  { 
-    Operation: 'Map', 'Method (ms)': results.mapMethod,
-    'Loop (ms)': results.mapLoop,
-    'Difference (loop - method)': Number((results.mapLoop - results.mapMethod).toFixed(5))
-  },
-  { 
-    Operation: 'Find', 'Method (ms)': results.findMethod,
-    'Loop (ms)': results.findLoop,
-    'Difference (loop - method)': Number((results.findLoop - results.findMethod).toFixed(5))
-  },
-  { 
-    Operation: 'FindIndex', 'Method (ms)': results.findIndexMethod,
-    'Loop (ms)': results.findIndexLoop,
-    'Difference (loop - method)': Number((results.findIndexLoop - results.findIndexMethod).toFixed(5))
-  },
-  { 
-    Operation: 'Filter', 'Method (ms)': results.filterMethod,
-    'Loop (ms)': results.filterLoop,
-    'Difference (loop - method)': Number((results.filterLoop - results.filterMethod).toFixed(5))
-  },
-  { 
-    Operation: 'Reduce', 'Method (ms)': results.reduceMethod,
-    'Loop (ms)': results.reduceLoop,
-    'Difference (loop - method)': Number((results.reduceLoop - results.reduceMethod).toFixed(5))
-  }
-]);
+console.table(avgResutlsFormattedTable);
 
 console.timeEnd('Test Execution Duration');
 
 
-function generateTestResults(testArray) {
+// Individual Test logic
+function generateTestResults(samples) {
   // For x ForEach
   const forEachStart = Date.now();
-  testArray.forEach((_, i) => {
-    testArray[i] = Math.ceil(Math.random() * 10000);
+  samples.forEach((_, i) => {
+    samples[i] = Math.ceil(Math.random() * 10000);
   });
   const forEachEnd = Date.now();
   const forEach = forEachEnd - forEachStart;
 
   const forLoopStart = Date.now();
-  for (let i = 0; i < testArray.length; i++) {
-    testArray[i] = Math.ceil(Math.random() * 10000);
+  for (let i = 0; i < samples.length; i++) {
+    samples[i] = Math.ceil(Math.random() * 10000);
   }
   const forLoopEnd = Date.now();
   const forLoop = forLoopEnd - forLoopStart;
 
   // Map
   const mapMethodStart = Date.now();
-  testArray.map(v => v % 2);
+  samples.map(v => v % 2);
   const mapMethodEnd = Date.now();
   const mapMethod = mapMethodEnd - mapMethodStart;
 
   const mapLoopStart = Date.now();
-  loopMap(testArray, '% 2');
+  loopMap(samples, '% 2');
   const mapLoopEnd = Date.now();
   const mapLoop = mapLoopEnd - mapLoopStart;
 
   // Find
   const findMethodStart = Date.now();
-  testArray.find(v => v === 255);
+  samples.find(v => v === 255);
   const findMethodEnd = Date.now();
   const findMethod = findMethodEnd - findMethodStart;
 
   const findLoopStart = Date.now();
-  loopFind(testArray, 255);
+  loopFind(samples, 255);
   const findLoopEnd = Date.now();
   const findLoop = findLoopEnd - findLoopStart;
 
   // FindIndex - redundant once we've tested Find, why not though?
   const findIndexMethodStart = Date.now();
-  testArray.findIndex(v => v === 255);
+  samples.findIndex(v => v === 255);
   const findIndexMethodEnd = Date.now();
   const findIndexMethod = findIndexMethodEnd - findIndexMethodStart;
 
   const findIndexLoopStart = Date.now();
-  loopFindIndex(testArray, 255);
+  loopFindIndex(samples, 255);
   const findIndexLoopEnd = Date.now();
   const findIndexLoop = findIndexLoopEnd - findIndexLoopStart;
 
   // Filter
   const filterMethodStart = Date.now();
-  testArray.filter(v => v % 2 === 0);
+  samples.filter(v => v % 2 === 0);
   const filterMethodEnd = Date.now();
   const filterMethod = filterMethodEnd - filterMethodStart;
 
   const filterLoopStart = Date.now();
-  loopFilter(testArray, '% 2 === 0');
+  loopFilter(samples, '% 2 === 0');
   const filterLoopEnd = Date.now();
   const filterLoop = filterLoopEnd - filterLoopStart;
 
   // Reduce
   const reduceMethodStart = Date.now();
-  testArray.reduce((acc, el) => acc + el, 0);
+  samples.reduce((acc, el) => acc + el, 0);
   const reduceMethodEnd = Date.now();
   const reduceMethod = reduceMethodEnd - reduceMethodStart;
 
   const reduceLoopStart = Date.now();
-  loopReduce(testArray, (acc, el) => acc + el, 0);
+  loopReduce(samples, (acc, el) => acc + el, 0);
   const reduceLoopEnd = Date.now();
   const reduceLoop = reduceLoopEnd - reduceLoopStart;
 
@@ -200,4 +206,9 @@ function loopReduce(array, fn, acc) {
     acc = fn(acc, element);
   }
   return acc;
+}
+
+// Util
+function capitalize(string) {
+  return string[0].toUpperCase() + string.slice(1, string.length);
 }

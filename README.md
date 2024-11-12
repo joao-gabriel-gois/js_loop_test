@@ -19,7 +19,17 @@ You just need to clone this repo and run `./js_loop_perfomance_test` (default ru
 
 In order to understand the maximum and viable amount of test samples that I could run to get more precise test results, I've also created a simple bash script to monitor CPU while tests are running. You just need to run it passing the process name as the first argument, like: `./CPU_monitor node` or `./CPU_monitor deno`. I've avoided using `watch` in order to keep track of the CPU usage changes. Once the test is done, type `ctrl + c` to stop the monitoring script.
 
-### Results
+___
+
+### TODO
+- [ ] Retest and Update Results with new Standard Deviation and Coefficient of Variation metrics for all Runtimes
+- [ ] Update other README details based on new results
+
+___
+
+### Results (Deprecated)
+
+<s>
 
 Despite any lack of care in my implementations of the loop functions
 that could have added more complexity than needed to it, the tests shows that using builtin methods is usually the best option. Only `.forEach` x `loopFor` showed a slight negative difference sometimes, while `.map` and `.filter` are much better than their loop counterparts than I would expect before actually test them.
@@ -55,3 +65,4 @@ that could have added more complexity than needed to it, the tests shows that us
     <br>
     
     _Since it meant to be a quick test and bun took 6x more time to run the default tests, I didn't test it with a higher load. Sorry Bun, you '[Alecrim Dourado](https://en.wiktionary.org/wiki/alecrim_dourado)' - **BRAZIL MENTIONED** - we'll call it a day._
+</s>
